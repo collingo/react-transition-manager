@@ -1,6 +1,6 @@
 {
   "name": "react-transition-manager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A robust transition component for React projects",
   "main": "lib/index.js",
   "scripts": {
