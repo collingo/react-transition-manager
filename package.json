@@ -1,10 +1,10 @@
 {
   "name": "react-transition-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A robust transition component for React projects",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "compile": "babel -o ./index.js ./src/index.js",
+    "compile": "babel -d ./lib ./src",
     "test": "mocha --compilers js:babel/register",
     "prepublish": "npm run compile"
   },
