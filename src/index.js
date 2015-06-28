@@ -44,7 +44,9 @@ const TransitionManager = React.createClass({
     return React.createElement(
       this.props.component,
       this.props,
-      this.state.children
+      this.state.children.map(child => React.cloneElement(child, {
+        ref: child.key
+      }))
     );
   },
   timers: {
@@ -88,7 +90,7 @@ const TransitionManager = React.createClass({
 
       // if doesn't exist, start a leave timeout
       if(!this.timers.leaving[key]) {
-        this.props.refs[key].componentWillLeave && this.props.refs[key].componentWillLeave();
+        this.refs[key].componentWillLeave && this.refs[key].componentWillLeave();
         this.timers.leaving[key] = setTimeout(() => {
           const state = this.state;
           remove(state.leaving, {

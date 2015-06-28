@@ -24,7 +24,7 @@ Children will receive the following classes at each stage of their transition cy
 
 ## Usage
 
-Uses a similar api to `TimeoutTransitionGroup`, you need to pass in a duration value in ms for the leave timeouts. All children must additionally have a matching, unique `key` and `ref` attribute. You must then pass down the parents refs so `TransitionManager` can keep tabs on each child. E.g.
+Uses a similar api to `TimeoutTransitionGroup`, you need to pass in a duration value in ms for the leave timeouts. All children must have a unique `key` so `TransitionManager` can keep tabs on each child. E.g.
 
 ```
 const Component = React.createClass({
@@ -32,17 +32,17 @@ const Component = React.createClass({
     let page;
     switch(this.props.pageId) {
       case 'home':
-        page = <Home key="home" ref="home" />;
+        page = <Home key="home" />;
         break;
       case 'about':
-        page = <About key="about" ref="about" />;
+        page = <About key="about" />;
         break;
       case 'contact':
-        page = <Contact key="contact" ref="contact" />;
+        page = <Contact key="contact" />;
         break;
     }
     return (
-      <TransitionManager component="div" duration={1000} refs={this.refs}>
+      <TransitionManager component="div" duration={1000}>
         {page}
       </TransitionManager>
     );
@@ -50,7 +50,7 @@ const Component = React.createClass({
 });
 ```
 
-* all props will be applied to the rendered dom
+* all passed props (`id`, `className` etc) will be applied to the rendered dom
 * `component` attribute allows for overriding the default `<span>` element type.
 
 ## License
