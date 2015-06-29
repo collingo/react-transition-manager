@@ -12,7 +12,7 @@ Inspired by React's own [`ReactCSSTransitionGroup`](https://facebook.github.io/r
 
 ## Transition cycle
 
-Children will receive the following classes at each stage of their transition cycle...
+Children will receive the following classes as props at each stage of their transition cycle. Please note, you will need to apply these classes to the children manually.*
 
 * `add` for new elements
   * prepare them for entry transition
@@ -22,11 +22,13 @@ Children will receive the following classes at each stage of their transition cy
   * `hide` is added in order to trigger the leave css transition
 * element is removed from the dom after timeout duration
 
+\* this is subject to change in a future version as this would best be automated by `TransitionManager`.
+
 ## Usage
 
 Uses a similar api to `TimeoutTransitionGroup`, you need to pass in a duration value in ms for the leave timeouts. All children must have a unique `key` so `TransitionManager` can keep tabs on each child. E.g.
-
 ```
+import TransitionManager from 'react-transition-manager';
 const Component = React.createClass({
   render() {
     let page;

@@ -31,7 +31,7 @@ const TransitionManager = React.createClass({
     const currentEntering = state.entering;
     const currentLeaving = state.leaving;
     const targetLeaving = filter(currentChildren, (child) => !isIn(child, targetChildren));
-    const targetEntering = filter(targetChildren, (child) => !isIn(child, currentChildren) || (isIn(child, currentEntering) && !isIn(child, targetLeaving)));
+    const targetEntering = filter(targetChildren, (child) => (isIn(child, currentEntering) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving) || !isIn(child, currentChildren));
     const persisting = filter(currentChildren, (child) => !isIn(child, targetEntering) && !isIn(child, targetLeaving));
     const children = mergeChildren(currentChildren, targetChildren, persisting);
     this.setState({
@@ -75,7 +75,7 @@ const TransitionManager = React.createClass({
           clearTimeout(this.timers.entering[key]);
           delete this.timers.entering[key];
           this.setState(state);
-        }.bind(this), 1);
+        }.bind(this), 10);
       }
     }, this);
 
