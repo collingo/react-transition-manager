@@ -1,4 +1,4 @@
-import {cloneWithClasses, getClonerForClasses} from './clone-with-classes';
+import cloneWithClasses from './clone-with-classes';
 import isIn from './is-in';
 
 function mergeChildren(currentChildren, targetChildren, persisting) {

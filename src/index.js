@@ -5,14 +5,14 @@ import filter from 'lodash/collection/filter';
 import remove from 'lodash/array/remove';
 import findIndex from 'lodash/array/findIndex';
 
-import {cloneWithClasses, getClonerForClasses} from './clone-with-classes';
+import cloneWithClasses from './clone-with-classes';
 import isIn from './is-in';
 import mergeChildren from './merge-children';
 
 const TransitionManager = React.createClass({
   displayName: 'TransitionManager',
   getInitialState() {
-    const children = [].concat(this.props.children).map(getClonerForClasses(['add', 'show']));
+    const children = [].concat(this.props.children).map(child => cloneWithClasses(child, ['add', 'show']));
     return {
       entering: [],
       leaving: [],
@@ -30,14 +30,14 @@ const TransitionManager = React.createClass({
     const currentChildren = state.children;
     const currentEntering = state.entering;
     const currentLeaving = state.leaving;
-    const targetLeaving = filter(currentChildren, (child) => !isIn(child, targetChildren));
-    const targetEntering = filter(targetChildren, (child) => (isIn(child, currentEntering) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving) || !isIn(child, currentChildren));
-    const persisting = filter(currentChildren, (child) => !isIn(child, targetEntering) && !isIn(child, targetLeaving));
+    const targetLeaving = filter(currentChildren, child => !isIn(child, targetChildren));
+    const targetEntering = filter(targetChildren, child => (isIn(child, currentEntering) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving) || !isIn(child, currentChildren));
+    const persisting = filter(currentChildren, child => !isIn(child, targetEntering) && !isIn(child, targetLeaving));
     const children = mergeChildren(currentChildren, targetChildren, persisting);
     this.setState({
       entering: targetEntering,
       leaving: targetLeaving,
-      children: children
+      children: children.map(child => isIn(child, targetEntering) ? cloneWithClasses(child, ['add']) : child)
     });
   },
   render() {
