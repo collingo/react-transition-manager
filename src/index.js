@@ -12,11 +12,11 @@ import mergeChildren from './merge-children';
 const TransitionManager = React.createClass({
   displayName: 'TransitionManager',
   getInitialState() {
-    const children = [].concat(this.props.children).map(child => cloneWithClasses(child, ['add', 'show']));
+    const children = this.getChildren(this.props.children);
     return {
       entering: [],
       leaving: [],
-      children: children
+      children: children.map(child => cloneWithClasses(child, ['add', 'show']))
     };
   },
   getDefaultProps() {
@@ -24,9 +24,12 @@ const TransitionManager = React.createClass({
       component: 'span'
     };
   },
+  getChildren(children) {
+    return children ? [].concat(children) : [];
+  },
   componentWillReceiveProps(newProps) {
     const state = this.state;
-    const targetChildren = [].concat(newProps.children);
+    const targetChildren = this.getChildren(newProps.children);
     const currentChildren = state.children;
     const currentEntering = state.entering;
     const currentLeaving = state.leaving;
