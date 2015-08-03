@@ -1,7 +1,7 @@
 import cloneWithClasses from './clone-with-classes';
 import isIn from './is-in';
 
-function mergeChildren(currentChildren, targetChildren, persisting) {
+function mergeChildren(currentChildren, targetChildren, persisting, targetEntering) {
   let targetIndex = 0;
   let currentIndex = 0;
   let targetChild = targetChildren[targetIndex];
@@ -9,7 +9,8 @@ function mergeChildren(currentChildren, targetChildren, persisting) {
   let children = [];
   while(targetChild || currentChild) {
     while(targetChild && !isIn(targetChild, persisting)) {
-      children.push(cloneWithClasses(targetChild, ['add']));
+      let classes = isIn(targetChild, targetEntering) ? ['add', 'show'] : ['add']
+      children.push(cloneWithClasses(targetChild, classes));
       targetChild = targetChildren[++targetIndex];
     }
     while(currentChild && !isIn(currentChild, persisting)) {
@@ -19,7 +20,7 @@ function mergeChildren(currentChildren, targetChildren, persisting) {
       currentChild = currentChildren[++currentIndex];
     }
     if(targetChild) {
-      children.push(cloneWithClasses(targetChild, ['add', 'show']));
+      children.push(cloneWithClasses(targetChild, ['add', 'show', 'shown']));
       targetChild = targetChildren[++targetIndex];
       currentChild = currentChildren[++currentIndex];
     }

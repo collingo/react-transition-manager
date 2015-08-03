@@ -14,9 +14,10 @@ const TransitionManager = React.createClass({
   getInitialState() {
     const children = this.getChildren(this.props.children);
     return {
+      adding: [],
       entering: [],
       leaving: [],
-      children: children.map(child => cloneWithClasses(child, ['add', 'show']))
+      children: children.map(child => cloneWithClasses(child, this.getClasses('shown')))
     };
   },
   getDefaultProps() {
@@ -30,14 +31,17 @@ const TransitionManager = React.createClass({
   componentWillReceiveProps(newProps) {
     const state = this.state;
     const targetChildren = this.getChildren(newProps.children);
+    const currentLeaving = state.leaving;
+    const currentAdding = state.adding;
     const currentChildren = state.children;
     const currentEntering = state.entering;
-    const currentLeaving = state.leaving;
     const targetLeaving = filter(currentChildren, child => !isIn(child, targetChildren));
-    const targetEntering = filter(targetChildren, child => (isIn(child, currentEntering) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving) || !isIn(child, currentChildren));
-    const persisting = filter(currentChildren, child => !isIn(child, targetEntering) && !isIn(child, targetLeaving));
-    const children = mergeChildren(currentChildren, targetChildren, persisting);
+    const targetAdding = filter(targetChildren, child => (isIn(child, currentAdding) && !isIn(child, targetLeaving)) || !isIn(child, currentChildren));
+    const targetEntering = filter(targetChildren, child => (isIn(child, currentEntering) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving));
+    const persisting = filter(currentChildren, child => !isIn(child, targetAdding) && !isIn(child, targetEntering) && !isIn(child, targetLeaving));
+    const children = mergeChildren(currentChildren, targetChildren, persisting, targetEntering);
     this.setState({
+      adding: targetAdding,
       entering: targetEntering,
       leaving: targetLeaving,
       children: children.map(child => isIn(child, targetEntering) ? cloneWithClasses(child, ['add']) : child)
@@ -53,10 +57,47 @@ const TransitionManager = React.createClass({
     );
   },
   timers: {
+    adding: {},
     entering: {},
     leaving: {}
   },
+  getClasses(componentState) {
+    let classes = 'add';
+    switch(componentState) {
+      case 'show':
+        classes += ' show';
+        break;
+      case 'shown':
+        classes += ' show shown';
+        break;
+      case 'hide':
+        classes += ' show shown hide';
+        break;
+    }
+    return classes;
+  },
   componentDidUpdate() {
+    this.state.adding.forEach((child) => {
+      const key = child.key;
+
+      // if doesn't exist, start an add timeout
+      if(!this.timers.adding[key]) {
+        this.timers.adding[key] = setTimeout(() => {
+          const state = this.state;
+          const component = remove(state.adding, {
+            key: key
+          })[0];
+          const newComponent = cloneWithClasses(component, this.getClasses('show'));
+
+          clearTimeout(this.timers.adding[key]);
+          delete this.timers.adding[key];
+          state.entering.push(component);
+          state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
+          this.setState(state);
+        }, 10);
+      }
+    });
+
     this.state.entering.forEach((child) => {
       const key = child.key;
 
@@ -73,14 +114,15 @@ const TransitionManager = React.createClass({
           const component = remove(state.entering, {
             key: key
           })[0];
-          const entering = cloneWithClasses(component, ['add', 'show']);
-          state.children.splice(findIndex(state.children, 'key', key), 1, entering);
+          const newComponent = cloneWithClasses(component, this.getClasses('shown'));
+
           clearTimeout(this.timers.entering[key]);
           delete this.timers.entering[key];
+          state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
           this.setState(state);
-        }.bind(this), 10);
+        }, this.props.duration);
       }
-    }, this);
+    });
 
     this.state.leaving.forEach((child) => {
       const key = child.key;
@@ -102,12 +144,13 @@ const TransitionManager = React.createClass({
           remove(state.children, {
             key: key
           });
+
           clearTimeout(this.timers.leaving[key]);
           delete this.timers.leaving[key];
           this.setState(state);
-        }.bind(this), this.props.duration);
+        }, this.props.duration);
       }
-    }, this);
+    });
   },
 });
 
