@@ -17,7 +17,7 @@ const TransitionManager = React.createClass({
       adding: [],
       entering: [],
       leaving: [],
-      children: children.map(child => cloneWithClasses(child, this.getClasses('shown')))
+      children: children.map(child => cloneWithClasses(child, 'shown'))
     };
   },
   getDefaultProps() {
@@ -44,7 +44,7 @@ const TransitionManager = React.createClass({
       adding: targetAdding,
       entering: targetEntering,
       leaving: targetLeaving,
-      children: children.map(child => isIn(child, targetEntering) ? cloneWithClasses(child, ['add']) : child)
+      children: children.map(child => isIn(child, targetEntering) ? cloneWithClasses(child, 'add') : child)
     });
   },
   render() {
@@ -61,21 +61,6 @@ const TransitionManager = React.createClass({
     entering: {},
     leaving: {}
   },
-  getClasses(componentState) {
-    let classes = 'add';
-    switch(componentState) {
-      case 'show':
-        classes += ' show';
-        break;
-      case 'shown':
-        classes += ' show shown';
-        break;
-      case 'hide':
-        classes += ' show shown hide';
-        break;
-    }
-    return classes;
-  },
   componentDidUpdate() {
     this.state.adding.forEach((child) => {
       const key = child.key;
@@ -87,7 +72,7 @@ const TransitionManager = React.createClass({
           const component = remove(state.adding, {
             key: key
           })[0];
-          const newComponent = cloneWithClasses(component, this.getClasses('show'));
+          const newComponent = cloneWithClasses(component, 'show');
 
           clearTimeout(this.timers.adding[key]);
           delete this.timers.adding[key];
@@ -114,7 +99,7 @@ const TransitionManager = React.createClass({
           const component = remove(state.entering, {
             key: key
           })[0];
-          const newComponent = cloneWithClasses(component, this.getClasses('shown'));
+          const newComponent = cloneWithClasses(component, 'shown');
 
           clearTimeout(this.timers.entering[key]);
           delete this.timers.entering[key];

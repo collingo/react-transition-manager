@@ -7,8 +7,8 @@ import proxyquire from 'proxyquire';
 
 chai.use(sinonChai);
 
-function cloneWithClasses (item, classes) {
-  item.classes = classes;
+function cloneWithClasses(item, state) {
+  item.classes = state;
   return item;
 }
 
@@ -28,10 +28,7 @@ describe('mergeChildren', () => {
     sandbox = sinon.sandbox.create();
     cloneWithClassesSpy = sandbox.spy(cloneWithClasses);
     mergeChildren = proxyquire('../src/merge-children', {
-      './clone-with-classes': {
-        cloneWithClasses: cloneWithClassesSpy,
-        getClonerForClasses: () => {}
-      }
+      './clone-with-classes': cloneWithClassesSpy
     });
     child1 = { key: 1 };
     child2 = { key: 2 };
@@ -60,12 +57,10 @@ describe('mergeChildren', () => {
     });
     it('should return same children', () => {
       expect(result.length).to.equal(1);
-      expect(result[0]).to.equal(child1);
+      expect(result[0].key).to.equal(child1.key);
     });
-    it('should add "show" classes to child', () => {
-      expect(result[0].classes).to.include("add");
-      expect(result[0].classes).to.include("show");
-      expect(result[0].classes).to.not.include("hide");
+    it('should add "shown" classes to child', () => {
+      expect(result[0].classes).to.equal("shown");
     });
   });
 
@@ -77,13 +72,11 @@ describe('mergeChildren', () => {
       expect(result.length).to.equal(2);
     });
     it('should be in the correct order', () => {
-      expect(result[0]).to.equal(child1);
-      expect(result[1]).to.equal(child2);
+      expect(result[0].key).to.equal(child1.key);
+      expect(result[1].key).to.equal(child2.key);
     });
     it('should add "add" classes to new child', () => {
-      expect(result[1].classes).to.include("add");
-      expect(result[1].classes).to.not.include("show");
-      expect(result[1].classes).to.not.include("hide");
+      expect(result[1].classes).to.equal("add");
     });
   });
 
@@ -93,12 +86,10 @@ describe('mergeChildren', () => {
     });
     it('should return same children', () => {
       expect(result.length).to.equal(1);
-      expect(result[0]).to.equal(child1);
+      expect(result[0].key).to.equal(child1.key);
     });
     it('should add "hide" classes to old child', () => {
-      expect(result[0].classes).to.include("add");
-      expect(result[0].classes).to.include("show");
-      expect(result[0].classes).to.include("hide");
+      expect(result[0].classes).to.equal("hide");
     });
   });
 
@@ -110,16 +101,12 @@ describe('mergeChildren', () => {
       expect(result.length).to.equal(2);
     });
     it('should order children correctly', () => {
-      expect(result[0]).to.equal(child2);
-      expect(result[1]).to.equal(child1);
+      expect(result[0].key).to.equal(child2.key);
+      expect(result[1].key).to.equal(child1.key);
     });
-    it('should maintain "show" classes to both children', () => {
-      expect(result[0].classes).to.include("add");
-      expect(result[0].classes).to.include("show");
-      expect(result[0].classes).to.not.include("hide");
-      expect(result[1].classes).to.include("add");
-      expect(result[1].classes).to.include("show");
-      expect(result[1].classes).to.not.include("hide");
+    it('should maintain "shown" classes to both children', () => {
+      expect(result[0].classes).to.equal("shown");
+      expect(result[1].classes).to.equal("shown");
     });
   });
 
@@ -131,18 +118,14 @@ describe('mergeChildren', () => {
       expect(result.length).to.equal(2);
     });
     it('should order children correctly', () => {
-      expect(result[0]).to.equal(child2);
-      expect(result[1]).to.equal(child1);
+      expect(result[0].key).to.equal(child2.key);
+      expect(result[1].key).to.equal(child1.key);
     });
     it('should add "add" classes to new child', () => {
-      expect(result[0].classes).to.include("add");
-      expect(result[0].classes).to.not.include("show");
-      expect(result[0].classes).to.not.include("hide");
+      expect(result[0].classes).to.equal("add");
     });
     it('should add "hide" classes to old child', () => {
-      expect(result[1].classes).to.include("add");
-      expect(result[1].classes).to.include("show");
-      expect(result[1].classes).to.include("hide");
+      expect(result[1].classes).to.equal("hide");
     });
   });
 
@@ -154,11 +137,11 @@ describe('mergeChildren', () => {
       expect(result.length).to.equal(5);
     });
     it('should order children correctly', () => {
-      expect(result[0]).to.equal(child4);
-      expect(result[1]).to.equal(child1);
-      expect(result[2]).to.equal(child2);
-      expect(result[3]).to.equal(child5);
-      expect(result[4]).to.equal(child3);
+      expect(result[0].key).to.equal(child4.key);
+      expect(result[1].key).to.equal(child1.key);
+      expect(result[2].key).to.equal(child2.key);
+      expect(result[3].key).to.equal(child5.key);
+      expect(result[4].key).to.equal(child3.key);
     });
   });
 

@@ -9,18 +9,18 @@ function mergeChildren(currentChildren, targetChildren, persisting, targetEnteri
   let children = [];
   while(targetChild || currentChild) {
     while(targetChild && !isIn(targetChild, persisting)) {
-      let classes = isIn(targetChild, targetEntering) ? ['add', 'show'] : ['add']
-      children.push(cloneWithClasses(targetChild, classes));
+      let state = isIn(targetChild, targetEntering) ? 'show' : 'add';
+      children.push(cloneWithClasses(targetChild, state));
       targetChild = targetChildren[++targetIndex];
     }
     while(currentChild && !isIn(currentChild, persisting)) {
       if(!isIn(currentChild, children)) {
-        children.push(cloneWithClasses(currentChild, ['add', 'show', 'hide']));
+        children.push(cloneWithClasses(currentChild, 'hide'));
       }
       currentChild = currentChildren[++currentIndex];
     }
     if(targetChild) {
-      children.push(cloneWithClasses(targetChild, ['add', 'show', 'shown']));
+      children.push(cloneWithClasses(targetChild, 'shown'));
       targetChild = targetChildren[++targetIndex];
       currentChild = currentChildren[++currentIndex];
     }
