@@ -26,10 +26,14 @@ Children will receive the following classes as props at each stage of their tran
 
 ## Usage
 
-Uses a similar api to `TimeoutTransitionGroup`, you need to pass in a duration value in ms for the leave timeouts. All children must have a unique `key` so `TransitionManager` can keep tabs on each child. E.g.
-```
+### Example Parent
+
+Using a similar api to `TimeoutTransitionGroup`, you need to pass in a duration value in ms for the leave timeouts. All children must have a unique `key` so `TransitionManager` can keep tabs on each child. E.g.
+
+`app.js`
+```js
 import TransitionManager from 'react-transition-manager';
-const Component = React.createClass({
+const App = React.createClass({
   render() {
     let page;
     switch(this.props.pageId) {
@@ -50,10 +54,31 @@ const Component = React.createClass({
     );
   }
 });
+export default App;
 ```
 
 * all passed props (`id`, `className` etc) will be applied to the rendered dom
 * `component` attribute allows for overriding the default `<span>` element type.
+
+### Example Child
+
+The classes are passed down to the child components in the `className` property. These need to be applied during the render method to take affect.
+
+Additionally the current `transitionState` is also passed as prop in case it's needed in the render logic.
+
+`home.js`
+```js
+var Home = React.createClass({
+  render: function() {
+    return (
+      <div className={this.props.className}>
+        Page is currently {this.props.transitionState}
+      </div>
+    );
+  }
+});
+export default Home;
+```
 
 ## License
 [MIT](http://opensource.org/licenses/MIT)
