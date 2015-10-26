@@ -16,6 +16,7 @@ const TransitionManager = React.createClass({
     return {
       adding: [],
       entering: [],
+      removing: [],
       leaving: [],
       children: children.map(child => cloneWithClasses(child, 'shown'))
     };
@@ -31,18 +32,21 @@ const TransitionManager = React.createClass({
   componentWillReceiveProps(newProps) {
     const state = this.state;
     const targetChildren = this.getChildren(newProps.children);
+    const currentRemoving = state.removing;
     const currentLeaving = state.leaving;
     const currentAdding = state.adding;
-    const currentChildren = state.children;
     const currentEntering = state.entering;
-    const targetLeaving = filter(currentChildren, child => !isIn(child, targetChildren));
-    const targetAdding = filter(targetChildren, child => (isIn(child, currentAdding) && !isIn(child, targetLeaving)) || !isIn(child, currentChildren));
-    const targetEntering = filter(targetChildren, child => (isIn(child, currentEntering) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving));
-    const persisting = filter(currentChildren, child => !isIn(child, targetAdding) && !isIn(child, targetEntering) && !isIn(child, targetLeaving));
-    const children = mergeChildren(currentChildren, targetChildren, persisting, targetEntering);
+    const currentChildren = state.children;
+    const targetRemoving = filter(currentChildren, child => !isIn(child, targetChildren) && !isIn(child, currentLeaving));
+    const targetLeaving = filter(currentChildren, child => !isIn(child, targetChildren) && !isIn(child, targetRemoving));
+    const targetAdding = filter(targetChildren, child => (isIn(child, currentAdding) && !isIn(child, targetRemoving) && !isIn(child, targetLeaving)) || !isIn(child, currentChildren));
+    const targetEntering = filter(targetChildren, child => (isIn(child, currentEntering) && !isIn(child, targetRemoving) && !isIn(child, targetLeaving)) || isIn(child, currentLeaving));
+    const persisting = filter(currentChildren, child => !isIn(child, targetAdding) && !isIn(child, targetEntering) && !isIn(child, targetRemoving) && !isIn(child, targetLeaving));
+    const children = mergeChildren(currentChildren, targetChildren, persisting, targetEntering, targetLeaving);
     this.setState({
       adding: targetAdding,
       entering: targetEntering,
+      removing: targetRemoving,
       leaving: targetLeaving,
       children: children.map(child => isIn(child, targetEntering) ? cloneWithClasses(child, 'add') : child)
     });
@@ -59,6 +63,7 @@ const TransitionManager = React.createClass({
   timers: {
     adding: {},
     entering: {},
+    removing: {},
     leaving: {}
   },
   componentDidUpdate() {
@@ -67,19 +72,7 @@ const TransitionManager = React.createClass({
 
       // if doesn't exist, start an add timeout
       if(!this.timers.adding[key]) {
-        this.timers.adding[key] = setTimeout(() => {
-          const state = this.state;
-          const component = remove(state.adding, {
-            key: key
-          })[0];
-          const newComponent = cloneWithClasses(component, 'show');
-
-          clearTimeout(this.timers.adding[key]);
-          delete this.timers.adding[key];
-          state.entering.push(component);
-          state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
-          this.setState(state);
-        }, 10);
+        this.timers.adding[key] = setTimeout(this.childAdded(key), 100);
       }
     });
 
@@ -94,18 +87,16 @@ const TransitionManager = React.createClass({
 
       // if doesn't exist, start an enter timeout
       if(!this.timers.entering[key]) {
-        this.timers.entering[key] = setTimeout(() => {
-          const state = this.state;
-          const component = remove(state.entering, {
-            key: key
-          })[0];
-          const newComponent = cloneWithClasses(component, 'shown');
+        this.timers.entering[key] = setTimeout(this.childEntered(key), this.props.duration);
+      }
+    });
 
-          clearTimeout(this.timers.entering[key]);
-          delete this.timers.entering[key];
-          state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
-          this.setState(state);
-        }, this.props.duration);
+    this.state.removing.forEach((child) => {
+      const key = child.key;
+
+      // if doesn't exist, start an add timeout
+      if(!this.timers.removing[key]) {
+        this.timers.removing[key] = setTimeout(this.childRemoved(key), 100);
       }
     });
 
@@ -121,22 +112,77 @@ const TransitionManager = React.createClass({
       // if doesn't exist, start a leave timeout
       if(!this.timers.leaving[key]) {
         this.refs[key].componentWillLeave && this.refs[key].componentWillLeave();
-        this.timers.leaving[key] = setTimeout(() => {
-          const state = this.state;
-          remove(state.leaving, {
-            key: key
-          });
-          remove(state.children, {
-            key: key
-          });
-
-          clearTimeout(this.timers.leaving[key]);
-          delete this.timers.leaving[key];
-          this.setState(state);
-        }, this.props.duration);
+        this.timers.leaving[key] = setTimeout(this.childLeft(key), this.props.duration);
       }
     });
   },
+  childAdded(key) {
+    return () => {
+      const state = this.state;
+      if(isIn({ key: key }, state.adding)) {
+        const component = remove(state.adding, {
+          key: key
+        })[0];
+        const newComponent = cloneWithClasses(component, 'show');
+
+        clearTimeout(this.timers.adding[key]);
+        delete this.timers.adding[key];
+        state.entering.push(newComponent);
+        state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
+        this.setState(state);
+      }
+    };
+  },
+  childEntered(key) {
+    return () => {
+      const state = this.state;
+      if(isIn({ key: key }, state.entering)) {
+        const component = remove(state.entering, {
+          key: key
+        })[0];
+        const newComponent = cloneWithClasses(component, 'shown');
+
+        clearTimeout(this.timers.entering[key]);
+        delete this.timers.entering[key];
+        state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
+        this.setState(state);
+      }
+    };
+  },
+  childRemoved(key) {
+    return () => {
+      const state = this.state;
+      if(isIn({ key: key }, state.removing)) {
+        const component = remove(state.removing, {
+          key: key
+        })[0];
+        const newComponent = cloneWithClasses(component, 'hide');
+
+        clearTimeout(this.timers.removing[key]);
+        delete this.timers.removing[key];
+        state.leaving.push(newComponent);
+        state.children.splice(findIndex(state.children, 'key', key), 1, newComponent);
+        this.setState(state);
+      }
+    };
+  },
+  childLeft(key) {
+    return () => {
+      const state = this.state;
+      if(isIn({ key: key }, state.leaving)) {
+        remove(state.leaving, {
+          key: key
+        });
+        remove(state.children, {
+          key: key
+        });
+
+        clearTimeout(this.timers.leaving[key]);
+        delete this.timers.leaving[key];
+        this.setState(state);
+      }
+    };
+  }
 });
 
 export default TransitionManager;

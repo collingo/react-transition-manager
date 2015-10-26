@@ -1,0 +1,68 @@
+.fade .stage,
+.translate .stage {
+  position: relative;
+  height: 200px;
+  width: 200px;
+  border: 1px solid black;
+  margin-left: 200px;
+}
+.fade .page,
+.translate .page {
+  display: block;
+  position: absolute;
+  width: 200px;
+  height:110px;
+  text-align: center;
+  padding-top: 90px;
+  background: #5c5;
+}
+.translate .page {
+  transition: transform 1s ease-in-out;
+  -webkit-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
+  -webkit-backface-visibility: hidden; /* Chrome, Safari, Opera */
+  backface-visibility: hidden;
+}
+.translate .page-1,
+.translate .page-4,
+.translate .page-7 {
+  background: #c55;
+}
+.translate .page-2,
+.translate .page-5,
+.translate .page-8 {
+  background: #55c;
+}
+.translate .page.add {
+  -webkit-transform: translate3d(200px,0,0);
+  transform: translate3d(200px,0,0);
+}
+.translate .page.show {
+  -webkit-transform: translate3d(0px,0,0);
+  transform: translate3d(0px,0,0);
+}
+.translate .page.hide {
+  -webkit-transform: translate3d(-200px,0,0);
+  transform: translate3d(-200px,0,0);
+}
+.translate.final .stage {
+  overflow: hidden;
+  margin: 0;
+}
+.fade .stage {
+  margin: 0;
+}
+.fade .page {
+  transition: opacity 1s ease-in-out;
+}
+.fade .page.add {
+  opacity: 0;
+}
+.fade .page.show {
+  transition-delay: 0.5s;
+  opacity: 1;
+}
+.fade .page.hide {
+  transition-delay: 0s;
+  opacity: 0;
+}
