@@ -18,6 +18,10 @@
 }
 .translate .page {
   transition: transform 1s ease-in-out;
+  -webkit-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
+  -webkit-backface-visibility: hidden; /* Chrome, Safari, Opera */
+  backface-visibility: hidden;
 }
 .translate .page-1,
 .translate .page-4,
@@ -30,13 +34,16 @@
   background: #55c;
 }
 .translate .page.add {
-  transform: translate(200px);
+  -webkit-transform: translate3d(200px,0,0);
+  transform: translate3d(200px,0,0);
 }
 .translate .page.show {
-  transform: translate(0px);
+  -webkit-transform: translate3d(0px,0,0);
+  transform: translate3d(0px,0,0);
 }
 .translate .page.hide {
-  transform: translate(-200px);
+  -webkit-transform: translate3d(-200px,0,0);
+  transform: translate3d(-200px,0,0);
 }
 .translate.final .stage {
   overflow: hidden;

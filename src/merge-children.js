@@ -1,7 +1,7 @@
 import cloneWithClasses from './clone-with-classes';
 import isIn from './is-in';
 
-function mergeChildren(currentChildren, targetChildren, persisting, targetEntering) {
+function mergeChildren(currentChildren, targetChildren, persisting, targetEntering, targetLeaving) {
   let targetIndex = 0;
   let currentIndex = 0;
   let targetChild = targetChildren[targetIndex];
@@ -15,7 +15,8 @@ function mergeChildren(currentChildren, targetChildren, persisting, targetEnteri
     }
     while(currentChild && !isIn(currentChild, persisting)) {
       if(!isIn(currentChild, children)) {
-        children.push(cloneWithClasses(currentChild, 'hide'));
+        let state = isIn(currentChild, targetLeaving) ? 'hide' : 'remove';
+        children.push(cloneWithClasses(currentChild, state));
       }
       currentChild = currentChildren[++currentIndex];
     }

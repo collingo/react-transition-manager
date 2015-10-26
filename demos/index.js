@@ -13,7 +13,7 @@ var _srcIndex2 = _interopRequireDefault(_srcIndex);
 
 var noOfPages = 9;
 var Demo = _react2['default'].createClass({
-  displayName: 'Demo',
+  displayName: "Demo",
   getInitialState: function getInitialState() {
     return {
       page: 0
@@ -57,7 +57,7 @@ var Demo = _react2['default'].createClass({
   }
 });
 var DemoPage = _react2['default'].createClass({
-  displayName: 'DemoPage',
+  displayName: "DemoPage",
   render: function render() {
     return _react2['default'].createElement(
       'div',
@@ -198,7 +198,9 @@ function drainQueue() {
         currentQueue = queue;
         queue = [];
         while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
         queueIndex = -1;
         len = queue.length;
@@ -250,7 +252,6 @@ process.binding = function (name) {
     throw new Error('process.binding is not supported');
 };
 
-// TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
@@ -263,6 +264,7 @@ process.umask = function() { return 0; };
   Licensed under the MIT License (MIT), see
   http://jedwatson.github.io/classnames
 */
+/* global define */
 
 (function () {
 	'use strict';
@@ -276,16 +278,17 @@ process.umask = function() { return 0; };
 			}
 		}
 
+		var hasOwn = {}.hasOwnProperty;
+
 		function _parseNumber (resultSet, num) {
 			resultSet[num] = true;
 		}
 
 		function _parseObject (resultSet, object) {
 			for (var k in object) {
-				if (object.hasOwnProperty(k)) {
+				if (hasOwn.call(object, k)) {
 					if (object[k]) {
 						resultSet[k] = true;
-
 					} else {
 						delete resultSet[k];
 					}
@@ -308,7 +311,7 @@ process.umask = function() { return 0; };
 			var argType = typeof arg;
 
 			// 'foo bar'
-			if ('string' === argType) {
+			if (argType === 'string') {
 				_parseString(resultSet, arg);
 
 			// ['foo', 'bar', ...]
@@ -316,11 +319,11 @@ process.umask = function() { return 0; };
 				_parseArray(resultSet, arg);
 
 			// { 'foo': true, ... }
-			} else if ('object' === argType) {
+			} else if (argType === 'object') {
 				_parseObject(resultSet, arg);
 
 			// '130'
-			} else if ('number' === argType) {
+			} else if (argType === 'number') {
 				_parseNumber(resultSet, arg);
 			}
 		}
@@ -328,30 +331,31 @@ process.umask = function() { return 0; };
 		function _classNames () {
 			var classSet = {};
 			_parseArray(classSet, arguments);
-
-			var classes = '';
+			
+			var list = [];
+			
 			for (var k in classSet) {
-				classes += ' ' + k;
+				if (hasOwn.call(classSet, k) && classSet[k]) {
+					list.push(k)
+				}
 			}
 
-			return classes.substr(1);
+			return list.join(' ');
 		}
 
 		return _classNames;
-
 	})();
 
 	if (typeof module !== 'undefined' && module.exports) {
 		module.exports = classNames;
-	} else if (typeof define === 'function' && typeof define.amd === 'object' && define.amd){
-		// AMD. Register as an anonymous module.
-		define(function () {
+	} else if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+		// register as 'classnames', consistent with npm package name
+		define('classnames', function () {
 			return classNames;
 		});
 	} else {
 		window.classNames = classNames;
 	}
-
 }());
 
 },{}],4:[function(require,module,exports){
@@ -1963,7 +1967,7 @@ var objToString = objectProto.toString;
 function isFunction(value) {
   // The use of `Object#toString` avoids issues with the `typeof` operator
   // in older versions of Chrome and Safari which return 'function' for regexes
-  // and Safari 8 equivalents which return 'object' for typed array constructors.
+  // and Safari 8 which returns 'object' for typed array constructors.
   return isObject(value) && objToString.call(value) == funcTag;
 }
 
@@ -22052,6 +22056,7 @@ module.exports = require('./lib/React');
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+exports['default'] = cloneWithClasses;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -22063,25 +22068,32 @@ var _classnamesDedupe = require('classnames/dedupe');
 
 var _classnamesDedupe2 = _interopRequireDefault(_classnamesDedupe);
 
-function cloneWithClasses(element, classes) {
+function getClasses(state) {
+  var classes = 'add';
+  switch (state) {
+    case 'show':
+      classes += ' show';
+      break;
+    case 'shown':
+      classes += ' show shown';
+      break;
+    case 'hide':
+      classes += ' show shown hide';
+      break;
+  }
+  return classes;
+}
+
+function cloneWithClasses(element, state) {
   var currentClasses = element.props.className ? element.props.className.split(' ') : [];
-  var newClasses = _classnamesDedupe2['default'].apply(null, currentClasses.concat(classes));
+  var newClasses = _classnamesDedupe2['default'].apply(null, currentClasses.concat(getClasses(state)));
   var newElement = _react2['default'].cloneElement(element, {
-    className: newClasses
+    className: newClasses,
+    transitionState: state
   });
   return newElement;
 }
 
-function getClonerForClasses(classes) {
-  return function (element) {
-    return cloneWithClasses(element, classes);
-  };
-}
-
-exports['default'] = {
-  cloneWithClasses: cloneWithClasses,
-  getClonerForClasses: getClonerForClasses
-};
 module.exports = exports['default'];
 
 },{"classnames/dedupe":3,"react":214}],216:[function(require,module,exports){
@@ -22111,6 +22123,8 @@ var _lodashArrayFindIndex2 = _interopRequireDefault(_lodashArrayFindIndex);
 
 var _cloneWithClasses = require('./clone-with-classes');
 
+var _cloneWithClasses2 = _interopRequireDefault(_cloneWithClasses);
+
 var _isIn = require('./is-in');
 
 var _isIn2 = _interopRequireDefault(_isIn);
@@ -22122,11 +22136,15 @@ var _mergeChildren2 = _interopRequireDefault(_mergeChildren);
 var TransitionManager = _react2['default'].createClass({
   displayName: 'TransitionManager',
   getInitialState: function getInitialState() {
-    var children = [].concat(this.props.children).map((0, _cloneWithClasses.getClonerForClasses)(['add', 'show']));
+    var children = this.getChildren(this.props.children);
     return {
+      adding: [],
       entering: [],
+      removing: [],
       leaving: [],
-      children: children
+      children: children.map(function (child) {
+        return (0, _cloneWithClasses2['default'])(child, 'shown');
+      })
     };
   },
   getDefaultProps: function getDefaultProps() {
@@ -22134,26 +22152,41 @@ var TransitionManager = _react2['default'].createClass({
       component: 'span'
     };
   },
+  getChildren: function getChildren(children) {
+    return children ? [].concat(children) : [];
+  },
   componentWillReceiveProps: function componentWillReceiveProps(newProps) {
     var state = this.state;
-    var targetChildren = [].concat(newProps.children);
-    var currentChildren = state.children;
-    var currentEntering = state.entering;
+    var targetChildren = this.getChildren(newProps.children);
+    var currentRemoving = state.removing;
     var currentLeaving = state.leaving;
+    var currentAdding = state.adding;
+    var currentEntering = state.entering;
+    var currentChildren = state.children;
+    var targetRemoving = (0, _lodashCollectionFilter2['default'])(currentChildren, function (child) {
+      return !(0, _isIn2['default'])(child, targetChildren) && !(0, _isIn2['default'])(child, currentLeaving);
+    });
     var targetLeaving = (0, _lodashCollectionFilter2['default'])(currentChildren, function (child) {
-      return !(0, _isIn2['default'])(child, targetChildren);
+      return !(0, _isIn2['default'])(child, targetChildren) && !(0, _isIn2['default'])(child, targetRemoving);
+    });
+    var targetAdding = (0, _lodashCollectionFilter2['default'])(targetChildren, function (child) {
+      return (0, _isIn2['default'])(child, currentAdding) && !(0, _isIn2['default'])(child, targetRemoving) && !(0, _isIn2['default'])(child, targetLeaving) || !(0, _isIn2['default'])(child, currentChildren);
     });
     var targetEntering = (0, _lodashCollectionFilter2['default'])(targetChildren, function (child) {
-      return (0, _isIn2['default'])(child, currentEntering) && !(0, _isIn2['default'])(child, targetLeaving) || (0, _isIn2['default'])(child, currentLeaving) || !(0, _isIn2['default'])(child, currentChildren);
+      return (0, _isIn2['default'])(child, currentEntering) && !(0, _isIn2['default'])(child, targetRemoving) && !(0, _isIn2['default'])(child, targetLeaving) || (0, _isIn2['default'])(child, currentLeaving);
     });
     var persisting = (0, _lodashCollectionFilter2['default'])(currentChildren, function (child) {
-      return !(0, _isIn2['default'])(child, targetEntering) && !(0, _isIn2['default'])(child, targetLeaving);
+      return !(0, _isIn2['default'])(child, targetAdding) && !(0, _isIn2['default'])(child, targetEntering) && !(0, _isIn2['default'])(child, targetRemoving) && !(0, _isIn2['default'])(child, targetLeaving);
     });
-    var children = (0, _mergeChildren2['default'])(currentChildren, targetChildren, persisting);
+    var children = (0, _mergeChildren2['default'])(currentChildren, targetChildren, persisting, targetEntering, targetLeaving);
     this.setState({
+      adding: targetAdding,
       entering: targetEntering,
+      removing: targetRemoving,
       leaving: targetLeaving,
-      children: children
+      children: children.map(function (child) {
+        return (0, _isIn2['default'])(child, targetEntering) ? (0, _cloneWithClasses2['default'])(child, 'add') : child;
+      })
     });
   },
   render: function render() {
@@ -22164,11 +22197,22 @@ var TransitionManager = _react2['default'].createClass({
     }));
   },
   timers: {
+    adding: {},
     entering: {},
+    removing: {},
     leaving: {}
   },
   componentDidUpdate: function componentDidUpdate() {
     var _this = this;
+
+    this.state.adding.forEach(function (child) {
+      var key = child.key;
+
+      // if doesn't exist, start an add timeout
+      if (!_this.timers.adding[key]) {
+        _this.timers.adding[key] = setTimeout(_this.childAdded(key), 100);
+      }
+    });
 
     this.state.entering.forEach(function (child) {
       var key = child.key;
@@ -22181,19 +22225,18 @@ var TransitionManager = _react2['default'].createClass({
 
       // if doesn't exist, start an enter timeout
       if (!_this.timers.entering[key]) {
-        _this.timers.entering[key] = setTimeout((function () {
-          var state = _this.state;
-          var component = (0, _lodashArrayRemove2['default'])(state.entering, {
-            key: key
-          })[0];
-          var entering = (0, _cloneWithClasses.cloneWithClasses)(component, ['add', 'show']);
-          state.children.splice((0, _lodashArrayFindIndex2['default'])(state.children, 'key', key), 1, entering);
-          clearTimeout(_this.timers.entering[key]);
-          delete _this.timers.entering[key];
-          _this.setState(state);
-        }).bind(_this), 100);
+        _this.timers.entering[key] = setTimeout(_this.childEntered(key), _this.props.duration);
       }
-    }, this);
+    });
+
+    this.state.removing.forEach(function (child) {
+      var key = child.key;
+
+      // if doesn't exist, start an add timeout
+      if (!_this.timers.removing[key]) {
+        _this.timers.removing[key] = setTimeout(_this.childRemoved(key), 100);
+      }
+    });
 
     this.state.leaving.forEach(function (child) {
       var key = child.key;
@@ -22207,20 +22250,84 @@ var TransitionManager = _react2['default'].createClass({
       // if doesn't exist, start a leave timeout
       if (!_this.timers.leaving[key]) {
         _this.refs[key].componentWillLeave && _this.refs[key].componentWillLeave();
-        _this.timers.leaving[key] = setTimeout((function () {
-          var state = _this.state;
-          (0, _lodashArrayRemove2['default'])(state.leaving, {
-            key: key
-          });
-          (0, _lodashArrayRemove2['default'])(state.children, {
-            key: key
-          });
-          clearTimeout(_this.timers.leaving[key]);
-          delete _this.timers.leaving[key];
-          _this.setState(state);
-        }).bind(_this), _this.props.duration);
+        _this.timers.leaving[key] = setTimeout(_this.childLeft(key), _this.props.duration);
       }
-    }, this);
+    });
+  },
+  childAdded: function childAdded(key) {
+    var _this2 = this;
+
+    return function () {
+      var state = _this2.state;
+      if ((0, _isIn2['default'])({ key: key }, state.adding)) {
+        var component = (0, _lodashArrayRemove2['default'])(state.adding, {
+          key: key
+        })[0];
+        var newComponent = (0, _cloneWithClasses2['default'])(component, 'show');
+
+        clearTimeout(_this2.timers.adding[key]);
+        delete _this2.timers.adding[key];
+        state.entering.push(newComponent);
+        state.children.splice((0, _lodashArrayFindIndex2['default'])(state.children, 'key', key), 1, newComponent);
+        _this2.setState(state);
+      }
+    };
+  },
+  childEntered: function childEntered(key) {
+    var _this3 = this;
+
+    return function () {
+      var state = _this3.state;
+      if ((0, _isIn2['default'])({ key: key }, state.entering)) {
+        var component = (0, _lodashArrayRemove2['default'])(state.entering, {
+          key: key
+        })[0];
+        var newComponent = (0, _cloneWithClasses2['default'])(component, 'shown');
+
+        clearTimeout(_this3.timers.entering[key]);
+        delete _this3.timers.entering[key];
+        state.children.splice((0, _lodashArrayFindIndex2['default'])(state.children, 'key', key), 1, newComponent);
+        _this3.setState(state);
+      }
+    };
+  },
+  childRemoved: function childRemoved(key) {
+    var _this4 = this;
+
+    return function () {
+      var state = _this4.state;
+      if ((0, _isIn2['default'])({ key: key }, state.removing)) {
+        var component = (0, _lodashArrayRemove2['default'])(state.removing, {
+          key: key
+        })[0];
+        var newComponent = (0, _cloneWithClasses2['default'])(component, 'hide');
+
+        clearTimeout(_this4.timers.removing[key]);
+        delete _this4.timers.removing[key];
+        state.leaving.push(newComponent);
+        state.children.splice((0, _lodashArrayFindIndex2['default'])(state.children, 'key', key), 1, newComponent);
+        _this4.setState(state);
+      }
+    };
+  },
+  childLeft: function childLeft(key) {
+    var _this5 = this;
+
+    return function () {
+      var state = _this5.state;
+      if ((0, _isIn2['default'])({ key: key }, state.leaving)) {
+        (0, _lodashArrayRemove2['default'])(state.leaving, {
+          key: key
+        });
+        (0, _lodashArrayRemove2['default'])(state.children, {
+          key: key
+        });
+
+        clearTimeout(_this5.timers.leaving[key]);
+        delete _this5.timers.leaving[key];
+        _this5.setState(state);
+      }
+    };
   }
 });
 
@@ -22258,11 +22365,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 var _cloneWithClasses = require('./clone-with-classes');
 
+var _cloneWithClasses2 = _interopRequireDefault(_cloneWithClasses);
+
 var _isIn = require('./is-in');
 
 var _isIn2 = _interopRequireDefault(_isIn);
 
-function mergeChildren(currentChildren, targetChildren, persisting) {
+function mergeChildren(currentChildren, targetChildren, persisting, targetEntering, targetLeaving) {
   var targetIndex = 0;
   var currentIndex = 0;
   var targetChild = targetChildren[targetIndex];
@@ -22270,17 +22379,19 @@ function mergeChildren(currentChildren, targetChildren, persisting) {
   var children = [];
   while (targetChild || currentChild) {
     while (targetChild && !(0, _isIn2['default'])(targetChild, persisting)) {
-      children.push((0, _cloneWithClasses.cloneWithClasses)(targetChild, ['add']));
+      var state = (0, _isIn2['default'])(targetChild, targetEntering) ? 'show' : 'add';
+      children.push((0, _cloneWithClasses2['default'])(targetChild, state));
       targetChild = targetChildren[++targetIndex];
     }
     while (currentChild && !(0, _isIn2['default'])(currentChild, persisting)) {
       if (!(0, _isIn2['default'])(currentChild, children)) {
-        children.push((0, _cloneWithClasses.cloneWithClasses)(currentChild, ['add', 'show', 'hide']));
+        var state = (0, _isIn2['default'])(currentChild, targetLeaving) ? 'hide' : 'remove';
+        children.push((0, _cloneWithClasses2['default'])(currentChild, state));
       }
       currentChild = currentChildren[++currentIndex];
     }
     if (targetChild) {
-      children.push((0, _cloneWithClasses.cloneWithClasses)(targetChild, ['add', 'show']));
+      children.push((0, _cloneWithClasses2['default'])(targetChild, 'shown'));
       targetChild = targetChildren[++targetIndex];
       currentChild = currentChildren[++currentIndex];
     }
