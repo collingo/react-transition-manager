@@ -84,7 +84,7 @@ var DemoPage = _react2['default'].createClass({
         'See ',
         _react2['default'].createElement(
           'a',
-          { href: 'https://github.com/collingo/react-transition-manager/tree/gh-pages/demos' },
+          { href: 'https://github.com/collingo/react-transition-manager/tree/master/demos' },
           'demos directory'
         ),
         ' in repo for the code behind these demos.'

@@ -80,5 +80,9 @@ var Home = React.createClass({
 export default Home;
 ```
 
+## Demos
+
+[collingo.com/react-transition-manager](http://collingo.com/react-transition-manager/)
+
 ## License
 [MIT](http://opensource.org/licenses/MIT)

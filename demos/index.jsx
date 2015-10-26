@@ -41,7 +41,7 @@ const DemoPage = React.createClass({
       <div id="app">
         <h1>Transition Manager</h1>
         <p>See <a href="https://github.com/collingo/react-transition-manager">readme on Github</a> for usage instructions.</p>
-        <p>See <a href="https://github.com/collingo/react-transition-manager/tree/gh-pages/demos">demos directory</a> in repo for the code behind these demos.</p>
+        <p>See <a href="https://github.com/collingo/react-transition-manager/tree/master/demos">demos directory</a> in repo for the code behind these demos.</p>
         <h2>Demos</h2>
         <p>All three demos use the same JSX and only vary in style.</p>
         <article className="demo">
