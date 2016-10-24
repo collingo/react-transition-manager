@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import TransitionManager from '../src/index';
 
 const noOfPages = 9;
@@ -69,7 +70,7 @@ const DemoPage = React.createClass({
   }
 });
 
-React.render(
+ReactDOM.render(
   <DemoPage />,
   document.body
 );

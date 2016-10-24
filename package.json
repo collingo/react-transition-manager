@@ -30,12 +30,13 @@
   "dependencies": {
     "classnames": "^2.1.2",
     "lodash": "^3.9.3",
-    "react": "^0.13.3"
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2"
   },
   "devDependencies": {
-    "babel": "^5.6.14",
-    "babelify": "^6.1.2",
-    "browserify": "^10.2.4",
+    "babel": "^5.8.38",
+    "babelify": "^6.4.0",
+    "browserify": "^10.2.6",
     "chai": "^3.0.0",
     "mocha": "^2.2.5",
     "proxyquire": "^1.5.0",
